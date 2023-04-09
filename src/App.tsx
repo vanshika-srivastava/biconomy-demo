@@ -34,7 +34,7 @@ export default function App() {
         "http://127.0.0.1:5173/"
       )
       await socialLoginSDK.init({
-        chainId: ethers.utils.hexValue(ChainId.POLYGON_MUMBAI).toString(),
+        chainId: ethers.utils.hexValue(ChainId.GOERLI).toString(),
         network: "testnet",
         whitelistUrls: {
           "http://127.0.0.1:5173/": signature1,
@@ -60,12 +60,12 @@ export default function App() {
     setProvider(web3Provider)
     try {
       const smartAccount = new SmartAccount(web3Provider, {
-        activeNetworkId: ChainId.POLYGON_MUMBAI,
-        supportedNetworksIds: [ChainId.POLYGON_MUMBAI],
+        activeNetworkId: ChainId.GOERLI,
+        supportedNetworksIds: [ChainId.GOERLI],
         networkConfig: [
           {
-            chainId: ChainId.POLYGON_MUMBAI,
-            dappAPIKey: "iVL1Ve2ZL.261f085a-53f5-40d6-b073-5c122149163a",
+            chainId: ChainId.GOERLI,
+            dappAPIKey: "lbKpAn2tU.e7a3faa0-b271-4f27-946c-1c78adf27cff",
           },
         ],
       })
