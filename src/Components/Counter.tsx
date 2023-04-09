@@ -68,7 +68,7 @@ const Counter: React.FC<Props> = ({ smartAccount, provider, acct }) => {
       }
 
       if (amount > 1) {
-        // This uses batch transactions to increment the count by the amount specified in gassless way (sign txn prompt will come in this)
+        // This uses batch transactions to increment the count by the amount specified in gassless way
         console.log("Batch transaction is used")
 
         for (let index = 0; index < amount; index++) {
@@ -80,7 +80,7 @@ const Counter: React.FC<Props> = ({ smartAccount, provider, acct }) => {
         const txHash = await txResponse.wait()
         console.log(txHash)
       } else {
-        // This will increment the count by only 1 in gassless way (no sign txn prompt will come in this)
+        // This will increment the count by only 1 in gassless way
         console.log("Simple transaction is used")
 
         const txResponse = await smartAccount.sendGaslessTransaction({
