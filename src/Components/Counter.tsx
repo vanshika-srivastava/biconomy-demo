@@ -16,7 +16,7 @@ const Counter: React.FC<Props> = ({ smartAccount, provider, acct }) => {
   const [counterContract, setCounterContract] = useState<any>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const counterAddress = "0x6305d48dAFfa321604B87eF8Bf8c2231c611F972"
+  const counterAddress = "0x47c248bd6b419ad162c0033f680f3183b6483763"
 
   useEffect(() => {
     setIsLoading(true)
