@@ -47,49 +47,7 @@ const Counter: React.FC<Props> = ({ smartAccount, provider, acct }) => {
     }
   }
 
-  // This function will increment the count by only 1 in gassless way (no sign txn prompt will come in this)
-  const singleIncrementCount = async () => {
-    try {
-      toast.info("processing count on the blockchain!", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      })
-      const incrementTx =
-        await counterContract.populateTransaction.incrementCount()
-      const tx1 = {
-        to: counterAddress,
-        data: incrementTx.data,
-      }
-      const txResponse = await smartAccount.sendGaslessTransaction({
-        transaction: tx1,
-      })
-
-      const txHash = await txResponse.wait()
-      console.log(txHash)
-      getCount(true)
-    } catch (error) {
-      console.log({ error })
-      toast.error("error occured check the console", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      })
-    }
-  }
-
-  // This uses batch transactions to increment the count by the amount specified in gassless way (sign txn prompt will come in this)
-  const multipleIncrementCount = async () => {
+  const incrementCount = async () => {
     try {
       toast.info("processing count on the blockchain!", {
         position: "top-right",
@@ -108,15 +66,30 @@ const Counter: React.FC<Props> = ({ smartAccount, provider, acct }) => {
         to: counterAddress,
         data: incrementTx.data,
       }
-      for (let index = 0; index < amount; index++) {
-        txArray.push(tx1)
-      }
-      const txResponse = await smartAccount.sendGaslessTransactionBatch({
-        transactions: txArray,
-      })
 
-      const txHash = await txResponse.wait()
-      console.log(txHash)
+      if (amount > 1) {
+        // This uses batch transactions to increment the count by the amount specified in gassless way (sign txn prompt will come in this)
+        console.log("Batch transaction is used")
+
+        for (let index = 0; index < amount; index++) {
+          txArray.push(tx1)
+        }
+        const txResponse = await smartAccount.sendGaslessTransactionBatch({
+          transactions: txArray,
+        })
+        const txHash = await txResponse.wait()
+        console.log(txHash)
+      } else {
+        // This will increment the count by only 1 in gassless way (no sign txn prompt will come in this)
+        console.log("Simple transaction is used")
+
+        const txResponse = await smartAccount.sendGaslessTransaction({
+          transaction: tx1,
+        })
+        const txHash = await txResponse.wait()
+        console.log(txHash)
+      }
+
       getCount(true)
     } catch (error) {
       console.log({ error })
@@ -155,7 +128,7 @@ const Counter: React.FC<Props> = ({ smartAccount, provider, acct }) => {
         value={amount}
         onChange={(e) => setAmount(Number(e.target.value))}
       />
-      <button onClick={() => multipleIncrementCount()}>Increment Count</button>
+      <button onClick={() => incrementCount()}>Increment Count</button>
     </>
   )
 }
