@@ -15,9 +15,14 @@ const Counter: React.FC<Props> = ({ smartAccount, provider, acct }) => {
   const [count, setCount] = useState<number>(0)
   const [counterContract, setCounterContract] = useState<any>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [amount, setAmount] = useState<number>(1)
+  const txArray = []
 
   const counterAddress = "0x47c248bd6b419ad162c0033f680f3183b6483763"
-
+  interface Tx {
+    to: string
+    data: string
+  }
   useEffect(() => {
     setIsLoading(true)
     getCount(false)
@@ -29,7 +34,7 @@ const Counter: React.FC<Props> = ({ smartAccount, provider, acct }) => {
     const currentCount = await contract.count()
     setCount(currentCount.toNumber())
     if (isUpdating) {
-      toast.success("count has been updated!", {
+      toast.success(`count has been updated by ${amount}!`, {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -42,7 +47,8 @@ const Counter: React.FC<Props> = ({ smartAccount, provider, acct }) => {
     }
   }
 
-  const incrementCount = async () => {
+  // This function will increment the count by only 1 in gassless way (no sign txn prompt will come in this)
+  const singleIncrementCount = async () => {
     try {
       toast.info("processing count on the blockchain!", {
         position: "top-right",
@@ -81,6 +87,52 @@ const Counter: React.FC<Props> = ({ smartAccount, provider, acct }) => {
       })
     }
   }
+
+  // This uses batch transactions to increment the count by the amount specified in gassless way (sign txn prompt will come in this)
+  const multipleIncrementCount = async () => {
+    try {
+      toast.info("processing count on the blockchain!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      })
+
+      const incrementTx =
+        await counterContract.populateTransaction.incrementCount()
+      const tx1 = {
+        to: counterAddress,
+        data: incrementTx.data,
+      }
+      for (let index = 0; index < amount; index++) {
+        txArray.push(tx1)
+      }
+      const txResponse = await smartAccount.sendGaslessTransactionBatch({
+        transactions: txArray,
+      })
+
+      const txHash = await txResponse.wait()
+      console.log(txHash)
+      getCount(true)
+    } catch (error) {
+      console.log({ error })
+      toast.error("error occured check the console", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      })
+    }
+  }
+
   return (
     <>
       <ToastContainer
@@ -95,7 +147,15 @@ const Counter: React.FC<Props> = ({ smartAccount, provider, acct }) => {
         pauseOnHover
         theme="dark"
       />
-      <button onClick={() => incrementCount()}>count is {count}</button>
+      <div>Count is {count}</div>
+      <br />
+      <input
+        type="number"
+        placeholder="Enter the amount by which you want to increment"
+        value={amount}
+        onChange={(e) => setAmount(Number(e.target.value))}
+      />
+      <button onClick={() => multipleIncrementCount()}>Increment Count</button>
     </>
   )
 }
